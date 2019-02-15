@@ -186,45 +186,45 @@ startToUseSDK()
     type: 'sdk_status',
     data:  //根据 SDK 所处的时机和状态不同，返回数据结构有不同, 一次消息只会存在以下情况的其中一种
 
-        //1.SDK初始化之前 [关联 API : init ]
+        1.SDK初始化之前 [关联 API : init ]
         {
         sdk_type : //string ,当前准备加载的SDK类型
         status: 'before_init' //当前所状态：sdk初始化之前
         }
 
-        //2.SDK初始化完成 [关联 API : init ]
+        2.SDK初始化完成 [关联 API : init ]
         {
         sdk_type：//string ,当前加载完成的SDK类型
         status: 'init_finished' //当前所状态：
         }
 
-        //3.切换SDK之前 [关联 API : changeSDK ]
+        3.切换SDK之前 [关联 API : changeSDK ]
         {
         sdk_type : //string ,当前正在使用的SDK类型
         target_sdk_type : //string ，目标SDK类型
         status:'before_sdk_change'
         }
 
-        //4.切换SDK完成 [关联 API : changeSDK ]
+        4.切换SDK完成 [关联 API : changeSDK ]
         {
         sdk_type： //string ,切换完成后的SDK类型
         status: 'sdk_changed'
         }
 
-        //5.卸载SDK完成 [关联 API : leaveRoom ]
+        5.卸载SDK完成 [关联 API : leaveRoom ]
         {
         sdk_type : //string ,被卸载的SDK类型
         status: 'uninstall_finished'
         }
 
-        //6. 开始执行切换小组之前（切换方法被调用，但还未真正执行切换动作）[关联 API : changeGroup ]
+        6. 开始执行切换小组之前（切换方法被调用，但还未真正执行切换动作）[关联 API : changeGroup ]
         {
         sdk_type: //string ,当前SDK类型
         target_room_id: // 目标房间ID( 小班课小组ID)
         status: 'before_room_change' //切换房间完成前
         }
 
-        //7.切换小组完成 （切换到新小组的信道和SDK类型，都已完毕）[关联 API : changeGroup ]
+        7.切换小组完成 （切换到新小组的信道和SDK类型，都已完毕）[关联 API : changeGroup ]
         {
         sdk_type : //string ,切换完成后的SDK类型,
         room_id : // 当前房间ID( 小班课小组ID)
@@ -234,8 +234,8 @@ startToUseSDK()
 ```
 2.收到同组用户的消息通知时，obj 数据结构:
 ```js
+ 1.表示有人进入到和当前用户相同的音视频房间了（但此时还不能看到他的画面）
 {
-    //表示有人进入到和当前用户相同的音视频房间了（但此时还不能看到他的画面）
     type:'user_join',
     data:{
         userId : //Number, 进入用户的userId
@@ -244,8 +244,8 @@ startToUseSDK()
         }
 }
 
+2.表示刚才进入房间的用户的，设备状态信息
 {
-    //表示刚才进入房间的用户的，设备状态信息
     type:'device_status',
     data:{
         userId : //Number, 进入用户的userId
@@ -256,9 +256,9 @@ startToUseSDK()
         }  
 }
 
+3.当 user_join 消息表示的用户本地推流成功后，会收到该消息
+  表示该用户的视频画面，已经可以展示和观看
 {
-    //当 user_join 消息表示的用户本地推流成功后，会收到该消息
-    //表示该用户的视频画面，已经可以展示和观看
     type:'remote_video_ready',
     data:{
         userId : //Number, 进入用户的userId
@@ -268,8 +268,8 @@ startToUseSDK()
         }
 }
 
+4.表示当前已经有用户在房间，对当前新进入房间用户的进行作出一次响应
 {
-    //表示当前已经有用户在房间，对当前新进入房间用户的进行作出一次响应
     type:'user_response',
     data:{
         userId : //Number, 已在房间用户的userId
@@ -278,8 +278,8 @@ startToUseSDK()
         }     
 }
 
+5.表示有用户离开当前房间
 {
-    //表示有用户离开当前房间
     type:'user_response',
     data:{
         userId : //Number, 已在房间用户的userId
@@ -290,33 +290,33 @@ startToUseSDK()
 ```
 3.本机用户接收到 SDK 主动通知的消息，obj 数据结构为:
 ```js
+1.更新本地预览视频，在切换SDK完成之后，会重新调起本地摄像头，需要更新本地预览的画面
+  [关联 API : changeSDK ]
 {
-    //更新本地预览视频，在切换SDK完成之后，会重新调起本地摄像头，需要更新本地预览的画面
-    // [关联 API : changeSDK ]
     type: 'update_local_preview',
     data:{
         videoSrc :blobValue //表示一串blob流地址（使用blobValue,赋值到 video标签的 src 属性中，即可展示他人画面）
         }
 }
 
+2.超出最大可接收视频人数限制提醒
 {
-    // 超出最大可接收视频人数限制提醒
     type:'over_max_connect',
     data:{
     message: "service index over max "
     }
 }
 
+4.网络错误
 {
-    // 网络错误
     type:'network_error',
     data:{
         message: 'Network error'
         }
 }
 
+4.网络重连
 {
-    // 网络重连
     //TODO- network_reconnect
     type:'network_recovery',
     data:{
@@ -325,16 +325,16 @@ startToUseSDK()
         }
 }
 
+5.信道连接断开
 {
-    // 信道连接断开
     type:'channel_disconnect',
     data:{
         message: 'Channel disconnect'
         }
 }
 
+6.信道恢复连接
 {
-    // 信道恢复连接
     type:'channel_disconnect',
     data:{
         message: 'Channel reconnect'
@@ -343,7 +343,7 @@ startToUseSDK()
 ```
 4.设备相关信息通知，obj 数据结构为:
 ```js
-//麦克风检测
+1.麦克风检测
 {
     type: 'real_time_mic_volume', //实时麦克风音量，默认未开启，需要执行 openMicVolumeCb 开启麦克风音量回调
     data: {
@@ -351,7 +351,7 @@ startToUseSDK()
             }
 }
 
-//设备检测出错
+2.设备检测出错
 {
     type: 'device_error', //设备检测出现问题
     data: {
@@ -362,7 +362,7 @@ startToUseSDK()
     }
 }
 
-//热插拔
+3.热插拔
 {
     type: 'plug_and_unplug', //当前有新设备插入或已有设备拔出
     data: {
@@ -375,8 +375,8 @@ startToUseSDK()
 ```
 5.推拉流质量相关信息通知，obj 数据结构为：
 ```js
+1.推流质量
 {
-    //推流质量
     type:'push_quality',
     data:{
             video: {
@@ -386,8 +386,8 @@ startToUseSDK()
         }
 }
 
+2.拉流质量
 {
-    //拉流质量
     type:'pull_quality',
     data:{
             video: {
