@@ -42,17 +42,49 @@ ZBY.setConfig({
 - 示例及参数说明:
 ```js
 //定义一个用来处理设备检测阶段 SDK 通知消息的回调函数
-function dealWithSDKMsg(obj){
+function dealWithSDKMsg(obj:{type:string, data:object}){
     //接收到的 obj 为一个消息对象，包含消息类型 type，和数据 data  
 }
-
 const extension = {
+    //TODO - 更新 extension 依靠 SDK 检测后获取
+    //目前可以先按照如下方式传递参数
     version: {
     rtc : '1.0.0.0',
     zego: '1.0.0.0',
     tool: '1.0.0.0'
     }
 }
-
 ZBY.deviceCheckerInit(dealWithSDKMsg, extension)
+```
+对于上面例子中 `dealWithSDKMsg` (当然也可以是自定义的其他函数名) 方法接收到的 `obj` 参数，根据不同的检测动作，会收到不同的事件回调，列举如下：
+```js
+//麦克风检测
+{
+    type: 'real_time_mic_volume', //实时麦克风音量
+    data: {
+            volume // Number，实时麦克风音量大小，范围为 [0, 100]
+            }
+}
+
+//设备检测出错
+{
+    type: 'device_error', //设备检测出现问题
+    data: {
+        deviceType, // string，出现问题的设备类型，'microphone'|'camera'
+        useDeviceId: deviceId, // string，当前使用的设备 id (以实际接收到的内容为准)
+        useDeviceName: deviceName, // string，当前使用的设备名称
+        deviceList: speakerData // array，当前的设备列表 (以实际接收到的内容为准)
+    }
+}
+
+//热插拔
+{
+    type: 'plug_and_unplug', //当前有新设备插入或已有设备拔出
+    data: {
+            deviceType, // string，设备类型，'microphone'|'camera'
+            useDeviceId: deviceId, // string，插拔后，当前使用的设备 id
+            useDeviceName: deviceName, // string，插拔后，当前使用的设备名称
+            deviceList: speakerData // array，插拔后，当前的设备列表
+        }
+}
 ```
