@@ -28,6 +28,17 @@ ZBY.setConfig({
 全局配置功能应当在 `SDK` 初始化 `init` 之前进行调用，才能确保初始化后使用设定好的配置项
 :::
 
+#### 获取 SDK 版本相关信息
+```js
+
+ZBY.version   //string, zby-live-sdk 版本信息，如： '1.0.0.0'
+
+ZBY.extensionVersion //object , zby-live-sdk 所依赖的扩展版本信息
+// {
+//     rtc: '1.0.0.0',
+//     zego: '1.0.0.0'
+// }
+```
 ## 设备检测
 
 ### deviceCheckerInit 
@@ -37,8 +48,25 @@ ZBY.setConfig({
 - 类型: `deviceCheckerInit(cb: function, extension: object) : Promise`
   
 ::: tip
-注意，该方法调用完毕之后，返回的是一个 Promise 对象，`SDK` 初始化需要对当前电脑设备底层进行一些操作，如摄像头、麦克风等的初始化等属于异步操作，返回 Promise 对象是为了方便你在当前动作执行完毕后，再进行下一步操作。参考 `async await` 用法
+注意，该方法调用完毕之后，返回的是一个 Promise 对象，`SDK` 初始化需要对当前电脑设备底层进行一些操作，如摄像头、麦克风等的初始化等属于异步操作，返回 Promise 对象是为了方便你在当前动作执行完毕后，再进行下一步操作。参考 `async await` 用法。
 :::
+`deviceCheckerInit`方法是专为设备检测进行的初始化，调用之后，可以使用和硬件设备相关的一些方法：
+```js
+* getCameraDeviceList() : Promise // 获取摄像头列表
+* setCameraDevice(deviceId: string) : Promise // 指定摄像头
+* openOrCloseCamera(operation: boolean) : Promise // 开/关摄像头
+* openMicVolumeCb(open: boolean) : void // 开启/关闭麦克风音量回调
+* getMicrophoneDeviceList() : Promise // 获取麦克风列表
+* setMicrophoneDevice(deviceId: string) : Promise // 指定麦克风
+* openOrCloseMicrophone(operation: boolean) : Promise // 开/禁麦
+* getOrLocateVideo(args: object) : Promise // 获取视频 src 或者将视频绑定到某一个 <video> 标签上
+* getSpeakerDeviceList() : Promise // 获取系统扬声器列表
+* setSpeakerDevice(deviceId: string) : Promise // 指定系统扬声器
+* getSpeakerVolume() : Promise  // 获取系统扬声器音量，返回 Number
+* setSpeakerVolume(volume: Number) : Promise // 设置系统扬声器音量
+``` 
+关于上述方法的详细使用情况，请查看下文详情
+
 - 示例及参数说明:
 ```js
 //定义一个用来处理设备检测阶段 SDK 通知消息的回调函数
@@ -54,13 +82,16 @@ const extension = {
     tool: '1.0.0.0'
     }
 }
-ZBY.deviceCheckerInit(dealWithSDKMsg, extension)
+async function testDevices(){
+    await ZBY.deviceCheckerInit(dealWithSDKMsg, extension)
+    // ...待上步操作执行完毕，再进行后续操作
+}
 ```
 对于上面例子中 `dealWithSDKMsg` (当然也可以是自定义的其他函数名) 方法接收到的 `obj` 参数，根据不同的检测动作，会收到不同的事件回调，列举如下：
 ```js
 //麦克风检测
 {
-    type: 'real_time_mic_volume', //实时麦克风音量
+    type: 'real_time_mic_volume', //实时麦克风音量，默认未开启，需要执行 openMicVolumeCb 开启麦克风音量回调
     data: {
             volume // Number，实时麦克风音量大小，范围为 [0, 100]
             }
@@ -88,3 +119,12 @@ ZBY.deviceCheckerInit(dealWithSDKMsg, extension)
         }
 }
 ```
+
+### openMicVolumeCb
+- 功能描述：开启或关闭麦克风音量回调，控制是否接收 `real_time_mic_volume` 消息 
+- 类型: `openMicVolumeCb(open: Boolean) : void`
+- 示例及参数说明:
+```js
+ZBY.openMicVolumeCb(true) // 打开接收麦克风音量回调
+```
+
