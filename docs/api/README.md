@@ -39,8 +39,8 @@ ZBY.extensionVersion //object , zby-live-sdk 所依赖的扩展版本信息
 //     zego: '1.0.0.0'
 // }
 ```
-## 设备检测
 
+## 设备检测
 ### deviceCheckerInit 
 
 - 功能描述：一种需要进行设备检测时所调用的初始化方法，区别于 `init` 方法, 该方法调用之后，可以使用的 SDK 能力有限，可以获取设备列表，开关摄像头、麦克风、扬声器等方法，但还不能实现推流和拉流
@@ -62,14 +62,14 @@ ZBY.extensionVersion //object , zby-live-sdk 所依赖的扩展版本信息
 * getOrLocateVideo(args: object) : Promise // 获取视频 src 或者将视频绑定到某一个 <video> 标签上
 * getSpeakerDeviceList() : Promise // 获取系统扬声器列表
 * setSpeakerDevice(deviceId: string) : Promise // 指定系统扬声器
-* getSpeakerVolume() : Promise  // 获取系统扬声器音量，返回 Number
-* setSpeakerVolume(volume: Number) : Promise // 设置系统扬声器音量
+* getSpeakerVolume() : Promise  // 获取系统扬声器音量，返回 number
+* setSpeakerVolume(volume: number) : Promise // 设置系统扬声器音量
 ``` 
 关于上述方法的详细使用情况，请查看下文详情
 
 - 示例及参数说明:
 ```js
-//定义一个用来处理设备检测阶段 SDK 通知消息的回调函数
+//用来处理设备检测阶段 SDK 通知消息的回调函数
 function dealWithSDKMsg(obj:{type:string, data:object}){
     //接收到的 obj 为一个消息对象，包含消息类型 type，和数据 data  
 }
@@ -86,6 +86,7 @@ async function testDevices(){
     await ZBY.deviceCheckerInit(dealWithSDKMsg, extension)
     // ...待上步操作执行完毕，再进行后续操作
 }
+testDevices()
 ```
 对于上面例子中 `dealWithSDKMsg` (当然也可以是自定义的其他函数名) 方法接收到的 `obj` 参数，根据不同的检测动作，会收到不同的事件回调，列举如下：
 ```js
@@ -128,3 +129,276 @@ async function testDevices(){
 ZBY.openMicVolumeCb(true) // 打开接收麦克风音量回调
 ```
 
+## 初始化方法
+### init
+- 功能描述: SDK 的完全初始化方法，该方法执行完毕之后，所有 SDK 方法均可调用
+- 类型: `init(options: object, dealSDKMsg: function) ：Promise`
+- 示例及参数说明:
+```js
+//初始化所需要的参数对象
+const options = {
+  userId, // string | number,用户 id,必选
+  sid, // string, 转录视频流所需要的推流目标 sid ,必选
+  institutionId, // string | number,机构id,必选
+  userName, // string,小组内用户名,必选
+  role, // string,'teacher' | 'student',必选
+  roomId, // string | number, 小组房间id,即组 id,必选
+  teacherId, //string | number, 当前课程的老师 id,必选
+  channelToken, // string,信道 token, 必选
+
+  //以下为执行过设备检测后，需要指定设备进行初始化时才需要传递 devices 参数，如不需要指定，可以不传， SDK 会使用系统默认设备进行初始化
+  devices: {
+    camera, // string,摄像头设备 id,可选
+    microphone, // string,麦克风设备 id,可选
+    speaker // string,扬声器设备 id,可选
+  },
+
+  extension: { // object,扩展相关信息,必选
+    version: {
+      tool, // string,比如'1.0.0.0',必选
+      rtc, // string,比如'1.0.0.0',必选
+      zego // string,比如'1.0.0.0',必选
+    }
+  },
+}
+
+//用来处理设备检测阶段 SDK 通知消息的回调函数 [可以与设备检测时传递的回调函数相同]
+function dealWithSDKMsg(obj:{type:string, data:object}){
+    //接收到的 obj 为一个消息对象，包含消息类型 type，和数据 data  
+        // obj格式如下：
+        {
+        type, // string，回调事件类型
+        data // object，与回调事件对应的回调数据
+        }
+}
+
+async function startToUseSDK(){
+    await ZBY.init(options, dealWithSDKMsg) 
+    // 之后可以进行开关摄像头、获取本地预览视频，推流等操作
+}
+startToUseSDK()
+```
+与设备检测时相同，`dealWithSDKMsg` 函数也会接收到`SDK`传递回来的多种消息：
+
+1.通知 SDK 加载状态时，obj 数据结构:
+```js
+{   
+    type: 'sdk_status',
+    data:  //根据 SDK 所处的时机和状态不同，返回数据结构有不同, 一次消息只会存在以下情况的其中一种
+
+        //1.SDK初始化之前 [关联 API : init ]
+        {
+        sdk_type : //string ,当前准备加载的SDK类型
+        status: 'before_init' //当前所状态：sdk初始化之前
+        }
+
+        //2.SDK初始化完成 [关联 API : init ]
+        {
+        sdk_type：//string ,当前加载完成的SDK类型
+        status: 'init_finished' //当前所状态：
+        }
+
+        //3.切换SDK之前 [关联 API : changeSDK ]
+        {
+        sdk_type : //string ,当前正在使用的SDK类型
+        target_sdk_type : //string ，目标SDK类型
+        status:'before_sdk_change'
+        }
+
+        //4.切换SDK完成 [关联 API : changeSDK ]
+        {
+        sdk_type： //string ,切换完成后的SDK类型
+        status: 'sdk_changed'
+        }
+
+        //5.卸载SDK完成 [关联 API : leaveRoom ]
+        {
+        sdk_type : //string ,被卸载的SDK类型
+        status: 'uninstall_finished'
+        }
+
+        //6. 开始执行切换小组之前（切换方法被调用，但还未真正执行切换动作）[关联 API : changeGroup ]
+        {
+        sdk_type: //string ,当前SDK类型
+        target_room_id: // 目标房间ID( 小班课小组ID)
+        status: 'before_room_change' //切换房间完成前
+        }
+
+        //7.切换小组完成 （切换到新小组的信道和SDK类型，都已完毕）[关联 API : changeGroup ]
+        {
+        sdk_type : //string ,切换完成后的SDK类型,
+        room_id : // 当前房间ID( 小班课小组ID)
+        status:'room_changed' //切换房间已完成
+        }
+}
+```
+2.收到同组用户的消息通知时，obj 数据结构:
+```js
+{
+    //表示有人进入到和当前用户相同的音视频房间了（但此时还不能看到他的画面）
+    type:'user_join',
+    data:{
+        userId : //Number, 进入用户的userId
+        userName: //String, 进入用户的姓名
+        role: //String，进入用户的角色（'teacher'|'student'）
+        }
+}
+
+{
+    //表示刚才进入房间的用户的，设备状态信息
+    type:'device_status',
+    data:{
+        userId : //Number, 进入用户的userId
+        userName: //String, 进入用户的姓名
+        role: //String，进入用户的角色（'teacher'|'student'）
+        deviceType：//String 有状态变更的设备类型（'video'|'camera' 表示对方的 摄像头状态，'audio'|'microPhone', 表示对方的 麦克风状态），
+        deviceStatus：//String 设备开关状态 （'open' 开启| 'closed'关闭）
+        }  
+}
+
+{
+    //当 user_join 消息表示的用户本地推流成功后，会收到该消息
+    //表示该用户的视频画面，已经可以展示和观看
+    type:'remote_video_ready',
+    data:{
+        userId : //Number, 进入用户的userId
+        userName: //String, 进入用户的姓名
+        role: //String，进入用户的角色（'teacher'|'student'）
+        videoSrc : blobValue //表示一串blob形式的流地址, 使用blobValue, 赋值到 video标签的 src 属性中，即可展示观看）
+        }
+}
+
+{
+    //表示当前已经有用户在房间，对当前新进入房间用户的进行作出一次响应
+    type:'user_response',
+    data:{
+        userId : //Number, 已在房间用户的userId
+        userName: //String, 已在房间用户的姓名
+        role: //String，已在房间用户的角色（'teacher'|'student'）
+        }     
+}
+
+{
+    //表示有用户离开当前房间
+    type:'user_response',
+    data:{
+        userId : //Number, 已在房间用户的userId
+        userName: //String, 已在房间用户的姓名
+        role: //String，已在房间用户的角色（'teacher'|'student'）
+        }     
+}
+```
+3.本机用户接收到 SDK 主动通知的消息，obj 数据结构为:
+```js
+{
+    //更新本地预览视频，在切换SDK完成之后，会重新调起本地摄像头，需要更新本地预览的画面
+    // [关联 API : changeSDK ]
+    type: 'update_local_preview',
+    data:{
+        videoSrc :blobValue //表示一串blob流地址（使用blobValue,赋值到 video标签的 src 属性中，即可展示他人画面）
+        }
+}
+
+{
+    // 超出最大可接收视频人数限制提醒
+    type:'over_max_connect',
+    data:{
+    message: "service index over max "
+    }
+}
+
+{
+    // 网络错误
+    type:'network_error',
+    data:{
+        message: 'Network error'
+        }
+}
+
+{
+    // 网络重连
+    //TODO- network_reconnect
+    type:'network_recovery',
+    data:{
+        //TODO- Network reconnect
+        message: 'Network recovery'
+        }
+}
+
+{
+    // 信道连接断开
+    type:'channel_disconnect',
+    data:{
+        message: 'Channel disconnect'
+        }
+}
+
+{
+    // 信道恢复连接
+    type:'channel_disconnect',
+    data:{
+        message: 'Channel reconnect'
+        }
+}
+```
+4.设备相关信息通知，obj 数据结构为:
+```js
+//麦克风检测
+{
+    type: 'real_time_mic_volume', //实时麦克风音量，默认未开启，需要执行 openMicVolumeCb 开启麦克风音量回调
+    data: {
+            volume // Number，实时麦克风音量大小，范围为 [0, 100]
+            }
+}
+
+//设备检测出错
+{
+    type: 'device_error', //设备检测出现问题
+    data: {
+        deviceType, // string，出现问题的设备类型，'microphone'|'camera'
+        useDeviceId: deviceId, // string，当前使用的设备 id (以实际接收到的内容为准)
+        useDeviceName: deviceName, // string，当前使用的设备名称
+        deviceList: speakerData // array，当前的设备列表 (以实际接收到的内容为准)
+    }
+}
+
+//热插拔
+{
+    type: 'plug_and_unplug', //当前有新设备插入或已有设备拔出
+    data: {
+            deviceType, // string，设备类型，'microphone'|'camera'
+            useDeviceId: deviceId, // string，插拔后，当前使用的设备 id
+            useDeviceName: deviceName, // string，插拔后，当前使用的设备名称
+            deviceList: speakerData // array，插拔后，当前的设备列表
+        }
+}
+```
+5.推拉流质量相关信息通知，obj 数据结构为：
+```js
+{
+    //推流质量
+    type:'push_quality',
+    data:{
+            video: {
+            bitrate, // Number，画面码率
+            fps // Number，画面帧率
+            }
+        }
+}
+
+{
+    //拉流质量
+    type:'pull_quality',
+    data:{
+            video: {
+            bitrate, // Number，画面码率
+            fps, // Number，画面帧率
+            userId, // Number，用户 id
+            streamId, // String，流 id
+            volume, // Number，音量
+            realTimeVolume // Number，真实的实时音量
+            }
+        }
+}
+
+```
