@@ -400,5 +400,17 @@ startToUseSDK()
             }
         }
 }
+```
 
+### changeGroup
+- 功能说明：切换上课小组，该功能一般由（主讲、辅导）老师使用
+- 类型：`changeGroup(groupId: string, channelToekn:string) : Promise`
+- 示例及参数说明：
+```js
+    const groupId //目标小组的组 id
+    const channelToekn // 目标小组所需要的信道 token, 由业务后端调用直播云 API 返回对应 token 值
+    async function changeGroup(){
+        await ZBY.changeGroup(groupId, channelToekn)
+    }
+    changeGroup()
 ```
