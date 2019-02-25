@@ -94,7 +94,7 @@ testDevices()
 {
     type: 'real_time_mic_volume', //实时麦克风音量，默认未开启，需要执行 openMicVolumeCb 开启麦克风音量回调
     data: {
-            volume // Number，实时麦克风音量大小，范围为 [0, 100]
+            volume // Number，实时麦克风音量大小，范围为 [0, 100], 可以根据此数据做输入声音有无检测，如音浪值等
             }
 }
 
@@ -469,6 +469,21 @@ startToUseSDK()
     }
     setDevice()
 ```
+### getSpeakerVolume
+- 功能说明: 获取系统扬声器音量
+- 类型: `getSpeakerVolume()  ：Promise`
+- 示例及参数说明:
+```js
+    const currentVolume = await ZBY.getSpeakerVolume() // number 0-100 
+```
+
+### setSpeakerVolume
+- 功能说明: 设置扬声器音量，调节扬声器大小
+- 类型: `setSpeakerVolume(volume: number)  ：Promise`
+- 示例及参数说明:
+```js
+    await ZBY.setSpeakerVolume(60) 
+```
 
 ### openOrCloseCamera
 - 功能说明: 打开或关闭摄像头
@@ -478,7 +493,7 @@ startToUseSDK()
 ### openOrCloseMicrophone
 - 功能说明: 打开或关闭麦克风
     - 如果未调用过`setMicrophoneDevice`方法，则开关的是系统默认麦克风；如果
-    - 如果调用过`setMicrophoneDevice`方法，则开关的`setCameraDevice`设定过的麦克风
+    - 如果调用过`setMicrophoneDevice`方法，则开关的是`setCameraDevice`设定过的麦克风
 - 类型: `openOrCloseMicrophone(operation: Boolean)  ：Promise`
 - 示例及参数说明:
 ```js
@@ -486,7 +501,7 @@ startToUseSDK()
     await ZBY.openOrCloseMicrophone(true) 
 ```
 
-### c
+### getOrLocateVideo
 - 功能说明: 获取视频画面
     - 当 isLocal 为 `true`，代表获取本地摄像头预览画面，依赖于本地摄像头正常打开，即 `openOrCloseCamera` 打开摄像头成功
     - 当 isLocal 为 `false` 且 `userId` 非本人，即获取他人视频画面地址
