@@ -402,6 +402,91 @@ startToUseSDK()
 }
 ```
 
+## 退出教室
+### leaveRoom
+- 功能说明: 退出教室，停止 SDK 提供的各种功能，如音视频推拉流等
+- 类型: `leaveRoom() : Promise`
+- 示例:
+```js
+    await ZBY.leaveRoom()
+```
+
+## 设备相关
+### getCameraDeviceList
+- 功能说明: 获取当前电脑上的摄像头列表
+- 类型: `getCameraDeviceList() ：Promise`
+### getMicrophoneDeviceList
+- 功能说明: 获取当前电脑上的麦克风/话筒列表
+- 类型: `getMicrophoneDeviceList() ：Promise`
+### getSpeakerDeviceList
+- 功能说明: 获取当前电脑上的扬声器/音箱/耳机列表
+- 类型: `getSpeakerDeviceList() ：Promise`
+- 示例及参数说明:
+```js
+    async function getDeviceList{
+
+    const cameraList = await ZBY.getCameraDeviceList() // Array
+    const microPhoneList = await ZBY.getMicrophoneDeviceList() // Array
+    const speakerList = await ZBY.getSpeakerDeviceList() // Array
+        //List 数据结构
+        [
+            {
+            deviceId, // String，设备 id
+            deviceName, // String，设备名称
+            isDefault // Boolean，是否为系统默认设备，建议选择系统默认设备进行上课
+            }
+        ]
+    }
+```
+
+### setCameraDevice
+- 功能说明: 从`getCameraDeviceList`获取到的摄像头设备信息中，设定上课想要使用的具体摄像头；如未调用该方法，则 SDK 使用系统默认设备
+- 类型: `setCameraDevice(deviceId: String)  ：Promise`
+### setCameraDevice
+- 功能说明: 从`setMicrophoneDevice`获取到的麦克风/话筒列表中，设定上课想要使用的具体麦克风；如未调用该方法，则 SDK 使用系统默认设备
+- 类型: `setMicrophoneDevice(deviceId: String)  ：Promise`
+### setCameraDevice
+- 功能说明: 从`setSpeakerDevice`获取到的扬声器/音箱/耳机列表中，设定上课想要使用的具体扬声器；如未调用该方法，则 SDK 使用系统默认设备
+- 类型: `setSpeakerDevice(deviceId: String)  ：Promise`
+- 示例及参数说明:
+```js
+    //cameraDeviceList 即为 getCameraDeviceList 返回数据
+    const selectedCameraDeviceId = cameraList[0].deviceId
+    const selectedMicroPhoneDeviceId = microPhoneList[0].deviceId
+    const selectedSpeakerDeviceId = speakerList[0].deviceId
+
+    async function setDevice(){
+        //第一种 ：顺序执行
+        await ZBY.setCameraDevice(selectedCameraDeviceId) 
+        await ZBY.setMicrophoneDevice(selectedMicroPhoneDeviceId) 
+        await ZBY.setMicrophoneDevice(selectedSpeakerDeviceId)
+        //第二种 ： 并发执行
+        // Promise.all([
+        //     ZBY.setCameraDevice(selectedCameraDeviceId),
+        //     ZBY.setMicrophoneDevice(selectedMicroPhoneDeviceId) 
+        //     ZBY.setMicrophoneDevice(selectedSpeakerDeviceId)
+        // ]) 
+    }
+    setDevice()
+```
+
+### openOrCloseCamera
+- 功能说明: 打开或关闭摄像头
+    - 如果未调用过`setCameraDevice`方法，则开关的是系统默认摄像头；如果
+    - 如果调用过`setCameraDevice`方法，则开关的`setCameraDevice`设定过的摄像头
+- 类型: `openOrCloseCamera(operation: Boolean)  ：Promise`
+### openOrCloseMicrophone
+- 功能说明: 打开或关闭麦克风
+    - 如果未调用过`setMicrophoneDevice`方法，则开关的是系统默认麦克风；如果
+    - 如果调用过`setMicrophoneDevice`方法，则开关的`setCameraDevice`设定过的麦克风
+- 类型: `openOrCloseMicrophone(operation: Boolean)  ：Promise`
+- 示例及参数说明:
+```js
+    await ZBY.openOrCloseCamera(true) 
+    await ZBY.openOrCloseMicrophone(true) 
+```
+
+## 业务功能
 ### changeGroup
 - 功能说明：切换上课小组，该功能一般由（主讲、辅导）老师使用
 - 类型：`changeGroup(groupId: string, channelToekn:string) : Promise`
@@ -414,3 +499,4 @@ startToUseSDK()
     }
     changeGroup()
 ```
+
