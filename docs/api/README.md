@@ -442,10 +442,10 @@ startToUseSDK()
 ### setCameraDevice
 - 功能说明: 从`getCameraDeviceList`获取到的摄像头设备信息中，设定上课想要使用的具体摄像头；如未调用该方法，则 SDK 使用系统默认设备
 - 类型: `setCameraDevice(deviceId: String)  ：Promise`
-### setCameraDevice
+### setMicrophoneDevice
 - 功能说明: 从`setMicrophoneDevice`获取到的麦克风/话筒列表中，设定上课想要使用的具体麦克风；如未调用该方法，则 SDK 使用系统默认设备
 - 类型: `setMicrophoneDevice(deviceId: String)  ：Promise`
-### setCameraDevice
+### setSpeakerDevice
 - 功能说明: 从`setSpeakerDevice`获取到的扬声器/音箱/耳机列表中，设定上课想要使用的具体扬声器；如未调用该方法，则 SDK 使用系统默认设备
 - 类型: `setSpeakerDevice(deviceId: String)  ：Promise`
 - 示例及参数说明:
@@ -484,6 +484,23 @@ startToUseSDK()
 ```js
     await ZBY.openOrCloseCamera(true) 
     await ZBY.openOrCloseMicrophone(true) 
+```
+
+### c
+- 功能说明: 获取视频画面
+    - 当 isLocal 为 `true`，代表获取本地摄像头预览画面，依赖于本地摄像头正常打开，即 `openOrCloseCamera` 打开摄像头成功
+    - 当 isLocal 为 `false` 且 `userId` 非本人，即获取他人视频画面地址
+- 类型: `getOrLocateVideo( param: object) ：Promise`
+- 示例及参数说明:
+```js
+//async 函数内
+    const param = {
+    isLocal, // boolean，是否是本地的视频预览，必选
+    userId, //  string，用户 id，必选
+    domId // string，<video> 标签的 id，可选，如果传了就把视频绑定到对应的 <video> 标签上
+}
+  const videoSrc = await ZBY.getOrLocateVideo(param)  //videoSrc 为 blob 数据，直接绑定 video 标签 src 即可，注意 video 标签可以根据实际情况，开启 autoplay 自动播放，或者 通过 canplay 检测后，控制播放
+
 ```
 
 ## 业务功能
