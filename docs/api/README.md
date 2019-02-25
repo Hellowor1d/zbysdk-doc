@@ -517,6 +517,26 @@ startToUseSDK()
   const videoSrc = await ZBY.getOrLocateVideo(param)  //videoSrc 为 blob 数据，直接绑定 video 标签 src 即可，注意 video 标签可以根据实际情况，开启 autoplay 自动播放，或者 通过 canplay 检测后，控制播放
 
 ```
+## 音视频
+### startPushFlow
+- 功能说明: 开始推流,本地摄像头拍摄的视频数据开始向远端发送
+    - 依赖 `openOrCloseCamera` 成功
+- 类型: `startPushFlow() : Promise`
+- 示例及参数说明:
+```js
+    await ZBY.openOrCloseCamera(true) 
+    await ZBY.startPushFlow() 
+```
+### stopPushFlow
+- 功能说明: 停止推流,本地摄像头拍摄的视频数据停止向远端发送
+- 类型: `stopPushFlow() : Promise`
+- 示例及参数说明:
+```js
+    await ZBY.openOrCloseCamera(true) 
+    await ZBY.startPushFlow() 
+    //...
+    await ZBY.startPushFlow() 
+```
 
 ## 业务功能
 ### changeGroup
