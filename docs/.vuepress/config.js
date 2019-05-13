@@ -1,7 +1,7 @@
 module.exports = {
   // home: true,
   title: 'zby-live-sdk',
-  description: '在线教室一整套解决方案',
+  description: '在线教室一整套解决方案 JS-SDK',
   configureWebpack: {
     resolve: {
       alias: {
